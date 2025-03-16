@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Bean Sorting UI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="machine.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-8">
+                <div class="row">
+                    <!-- Status Module -->
+                    <div class="col-md-6">
+                        <div class="module" id="statusModule">
+                            <div class="status-box">
+                                <div class="status-indicator">
+                                    <div class="indicator" id="statusIndicator" style="background: green;"></div>
+                                    <span id="statusText">Active</span>
+                                </div>
+                                <video id="liveFeed" width="100%" height="200" style="background: #ddd;"
+                                    autoplay></video>
+                                <div class="mt-3 d-flex align-items-center">
+                                    <div class="progress w-75">
+                                        <div class="progress-bar bg-info" role="progressbar" id="progressBar"
+                                            style="width: 100%;"></div>
+                                    </div>
+                                    <span class="ms-2" id="progressText">100%</span>
+                                </div>
+                                <div class="mt-3 d-flex justify-content-center gap-2">
+                                    <button class="btn btn-success" onclick="startMachine()">Start</button>
+                                    <button class="btn btn-danger" onclick="stopMachine()">Stop</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Tracking Module -->
+                    <div class="col-md-6">
+                        <div class="module" id="trackingModule">
+                            <h3>Tracking Report (<span id="currentDate"></span>)</h3>
+                            <ul class="list-unstyled">
+                                <li>Green: <span id="greenCount">0</span></li>
+                                <li>Defected: <span id="defectedCount">0</span></li>
+                                <li>Foreign Object: <span id="foreignCount">0</span></li>
+                            </ul>
+                            <div class="dropdown mt-3">
+                                <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownMenuButton"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Export
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <li><button class="dropdown-item" onclick="exportReport('daily')">Daily</button>
+                                    </li>
+                                    <li><button class="dropdown-item" onclick="exportReport('monthly')">Monthly</button>
+                                    </li>
+                                    <li><button class="dropdown-item" onclick="exportReport('yearly')">Yearly</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Chart Module -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="module" id="chartModule">
+                            <h3>Analysis Graph</h3>
+                            <select id="timeScale" class="form-select mb-3">
+                                <option value="hourly">Hourly</option>
+                                <option value="daily">Daily</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                            <canvas id="sortingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <!-- Defect Module -->
+                <div class="module" id="defectModule">
+                    <h3>Defected Report (<span id="currentDate"></span>)</h3>
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Find..."
+                            oninput="filterCategories()">
+                        <select id="sortOption" class="form-select" onchange="sortCategories()">
+                            <option value="default">Default</option>
+                            <option value="alphabet">Alphabetical</option>
+                            <option value="count">By Count</option>
+                        </select>
+                    </div>
+                    <ul id="categoryList" class="category-list">
+                        <li>Cate A (<span id="cateA-count">0</span>)
+                            <ul class="sub-category">
+                                <li>Cate A1 (<span id="cateA1-count">0</span>)</li>
+                                <li>Cate A2 (<span id="cateA2-count">0</span>)</li>
+                                <li>Cate A3 (<span id="cateA3-count">0</span>)</li>
+                            </ul>
+                        </li>
+                        <li>Cate B (<span id="cateB-count">0</span>)
+                            <ul class="sub-category">
+                                <li>Cate B1 (<span id="cateB1-count">0</span>)</li>
+                                <li>Cate B2 (<span id="cateB2-count">0</span>)</li>
+                                <li>Cate B3 (<span id="cateB3-count">0</span>)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <button class="btn btn-light mt-2" onclick="loadMoreCategories()">Click to see more</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="machine.js"></script>
+</body>
+
+</html>
