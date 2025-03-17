@@ -249,19 +249,20 @@ function updateChartModule() {
 function exportReport(type) {
   calculateCategoryTotals();
   const data = [
-    ["Categories", "Number"],
-    ["Green", defectCounts.greenObject],
-    ["Defected", defectCounts.defected],
-    ["Worm", defectCounts.worm],
-    ["Crack", defectCounts.crack],
-    ["Black", defectCounts.black],
-    ["Foreign Object", defectCounts.foreignObject],
+    ["Danh Mục", "Số lượng"],
+    ["Hạt Xanh", defectCounts.greenObject],
+    ["Hạt Hư", defectCounts.defected],
+    ["Dị vật", defectCounts.foreignObject],
+    ["Chi Tiết Bệnh", " "],
+    ["Bị Sâu", defectCounts.worm],
+    ["Bị Bể", defectCounts.crack],
+    ["Bị Đen", defectCounts.black],
   ];
 
   const ws = XLSX.utils.aoa_to_sheet(data);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Report");
-  XLSX.writeFile(wb, `sorting_report_${type}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo");
+  XLSX.writeFile(wb, `Báo cáo phân loại hạt ${type}.xlsx`);
 }
 
 function resetValues() {
