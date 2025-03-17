@@ -17,7 +17,67 @@ let defectCounts = {
   foreignObject: 0,
 };
 
+// Thêm biến để lưu trữ dữ liệu theo thời gian
+let timeSeriesData = {
+  hour: Array(60)
+    .fill()
+    .map(() => ({
+      green: 0,
+      defected: 0,
+      foreign: 0,
+      worm: 0,
+      crack: 0,
+      black: 0,
+    })),
+  day: Array(24)
+    .fill()
+    .map(() => ({
+      green: 0,
+      defected: 0,
+      foreign: 0,
+      worm: 0,
+      crack: 0,
+      black: 0,
+    })),
+  week: Array(7)
+    .fill()
+    .map(() => ({
+      green: 0,
+      defected: 0,
+      foreign: 0,
+      worm: 0,
+      crack: 0,
+      black: 0,
+    })),
+  month: Array(31)
+    .fill()
+    .map(() => ({
+      green: 0,
+      defected: 0,
+      foreign: 0,
+      worm: 0,
+      crack: 0,
+      black: 0,
+    })),
+  year: Array(12)
+    .fill()
+    .map(() => ({
+      green: 0,
+      defected: 0,
+      foreign: 0,
+      worm: 0,
+      crack: 0,
+      black: 0,
+    })),
+};
+
 calculateCategoryTotals();
+
+// Thêm biến để lưu trữ chart configuration
+let chartConfig = {
+  type: "overview",
+  timeScale: "hourly",
+};
 
 function random(max) {
   return Math.floor(Math.random() * max);
@@ -160,11 +220,63 @@ function startMachine() {
   updateStatus("green", "Đang hoạt động");
   runSortingProcess();
   startChartUpdate();
-  // Reset tracking data when starting
+  // Reset tracking data and time series data when starting
   trackingData = {
     tracking1: {},
     tracking2: {},
     lastNumber: 0,
+  };
+  timeSeriesData = {
+    hour: Array(60)
+      .fill()
+      .map(() => ({
+        green: 0,
+        defected: 0,
+        foreign: 0,
+        worm: 0,
+        crack: 0,
+        black: 0,
+      })),
+    day: Array(24)
+      .fill()
+      .map(() => ({
+        green: 0,
+        defected: 0,
+        foreign: 0,
+        worm: 0,
+        crack: 0,
+        black: 0,
+      })),
+    week: Array(7)
+      .fill()
+      .map(() => ({
+        green: 0,
+        defected: 0,
+        foreign: 0,
+        worm: 0,
+        crack: 0,
+        black: 0,
+      })),
+    month: Array(31)
+      .fill()
+      .map(() => ({
+        green: 0,
+        defected: 0,
+        foreign: 0,
+        worm: 0,
+        crack: 0,
+        black: 0,
+      })),
+    year: Array(12)
+      .fill()
+      .map(() => ({
+        green: 0,
+        defected: 0,
+        foreign: 0,
+        worm: 0,
+        crack: 0,
+        black: 0,
+      })),
   };
 }
 
@@ -194,11 +306,52 @@ function classifyBean() {
   let type = random(10);
   if (type < 6) {
     defectCounts.greenObject++;
+    // Cập nhật dữ liệu theo thời gian
+    const now = new Date();
+    timeSeriesData.hour[now.getMinutes()].green++;
+    timeSeriesData.day[now.getHours()].green++;
+    timeSeriesData.week[now.getDay()].green++;
+    timeSeriesData.month[now.getDate() - 1].green++;
+    timeSeriesData.year[now.getMonth()].green++;
   } else if (type < 8) {
     let defectCategory = ["worm", "crack", "black"][random(3)];
     defectCounts[defectCategory]++;
+    // Cập nhật dữ liệu theo thời gian
+    const now = new Date();
+    timeSeriesData.hour[now.getMinutes()].defected++;
+    timeSeriesData.day[now.getHours()].defected++;
+    timeSeriesData.week[now.getDay()].defected++;
+    timeSeriesData.month[now.getDate() - 1].defected++;
+    timeSeriesData.year[now.getMonth()].defected++;
+
+    if (defectCategory === "worm") {
+      timeSeriesData.hour[now.getMinutes()].worm++;
+      timeSeriesData.day[now.getHours()].worm++;
+      timeSeriesData.week[now.getDay()].worm++;
+      timeSeriesData.month[now.getDate() - 1].worm++;
+      timeSeriesData.year[now.getMonth()].worm++;
+    } else if (defectCategory === "crack") {
+      timeSeriesData.hour[now.getMinutes()].crack++;
+      timeSeriesData.day[now.getHours()].crack++;
+      timeSeriesData.week[now.getDay()].crack++;
+      timeSeriesData.month[now.getDate() - 1].crack++;
+      timeSeriesData.year[now.getMonth()].crack++;
+    } else {
+      timeSeriesData.hour[now.getMinutes()].black++;
+      timeSeriesData.day[now.getHours()].black++;
+      timeSeriesData.week[now.getDay()].black++;
+      timeSeriesData.month[now.getDate() - 1].black++;
+      timeSeriesData.year[now.getMonth()].black++;
+    }
   } else {
     defectCounts.foreignObject++;
+    // Cập nhật dữ liệu theo thời gian
+    const now = new Date();
+    timeSeriesData.hour[now.getMinutes()].foreign++;
+    timeSeriesData.day[now.getHours()].foreign++;
+    timeSeriesData.week[now.getDay()].foreign++;
+    timeSeriesData.month[now.getDate() - 1].foreign++;
+    timeSeriesData.year[now.getMonth()].foreign++;
   }
   calculateCategoryTotals();
   updateCounts();
@@ -225,24 +378,126 @@ function calculateCategoryTotals() {
 }
 
 function startChartUpdate() {
-  let updateFrequency = 60000;
+  // Cập nhật ngay lập tức khi thay đổi loại biểu đồ
+  document.getElementById("chartType").addEventListener("change", () => {
+    if (machineRunning) updateChartData();
+  });
+
+  // Cập nhật tần suất khi thay đổi thang thời gian
+  let updateFrequency = 1000; // Mặc định cập nhật mỗi giây
   document.getElementById("timeScale").addEventListener("change", (event) => {
     let value = event.target.value;
     if (value === "hourly") updateFrequency = 3600000;
     else if (value === "tenMinutes") updateFrequency = 600000;
-    else updateFrequency = 60000;
+    else updateFrequency = 1000; // Cập nhật mỗi giây
+
+    // Khởi động lại interval với tần suất mới
+    if (chartUpdateInterval) {
+      clearInterval(chartUpdateInterval);
+    }
+    chartUpdateInterval = setInterval(() => {
+      if (machineRunning) updateChartData();
+    }, updateFrequency);
   });
 
-  setInterval(() => {
-    if (machineRunning) updateChartModule();
+  // Bắt đầu cập nhật theo thời gian thực
+  chartUpdateInterval = setInterval(() => {
+    if (machineRunning) updateChartData();
   }, updateFrequency);
 }
 
-function updateChartModule() {
-  sortingChart.data.labels.push(new Date().toLocaleTimeString());
-  sortingChart.data.datasets[0].data.push(defectCounts.greenObject);
-  sortingChart.data.datasets[1].data.push(defectCounts.defected);
-  sortingChart.data.datasets[2].data.push(defectCounts.foreignObject);
+function updateChartData() {
+  const type = document.getElementById("chartType").value;
+  const timeScale = document.getElementById("timeScale").value;
+
+  // Reset chart data
+  sortingChart.data.labels = [];
+  sortingChart.data.datasets.forEach((dataset) => {
+    dataset.data = [];
+  });
+
+  // Tạo labels cho trục X dựa trên thang thời gian
+  const timeLabels = [];
+  const now = new Date();
+
+  switch (timeScale) {
+    case "hour":
+      // 60 phút trong 1 giờ
+      for (let i = 0; i < 60; i++) {
+        timeLabels.push(`${i.toString().padStart(2, "0")}'`);
+      }
+      break;
+
+    case "day":
+      // 24 giờ trong 1 ngày
+      for (let i = 0; i < 24; i++) {
+        timeLabels.push(`${i.toString().padStart(2, "0")}:00`);
+      }
+      break;
+
+    case "week":
+      // 7 ngày trong 1 tuần
+      const weekdays = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+      timeLabels.push(...weekdays);
+      break;
+
+    case "month":
+      // Số ngày trong tháng hiện tại
+      const daysInMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0
+      ).getDate();
+      for (let i = 1; i <= daysInMonth; i++) {
+        timeLabels.push(`${i}`);
+      }
+      break;
+
+    case "year":
+      // 12 tháng trong năm
+      const months = [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+      ];
+      timeLabels.push(...months);
+      break;
+  }
+
+  sortingChart.data.labels = timeLabels;
+
+  // Lấy dữ liệu từ timeSeriesData
+  const data = timeSeriesData[timeScale];
+
+  if (type === "overview") {
+    // Cập nhật datasets cho tổng quát
+    sortingChart.data.datasets[0].data = data.map((d) => d.green);
+    sortingChart.data.datasets[1].data = data.map((d) => d.defected);
+    sortingChart.data.datasets[2].data = data.map((d) => d.foreign);
+
+    sortingChart.data.datasets[0].label = "Hạt Xanh";
+    sortingChart.data.datasets[1].label = "Hạt Hư";
+    sortingChart.data.datasets[2].label = "Dị Vật";
+  } else {
+    // Cập nhật datasets cho chi tiết bệnh
+    sortingChart.data.datasets[0].data = data.map((d) => d.worm);
+    sortingChart.data.datasets[1].data = data.map((d) => d.crack);
+    sortingChart.data.datasets[2].data = data.map((d) => d.black);
+
+    sortingChart.data.datasets[0].label = "Sâu";
+    sortingChart.data.datasets[1].label = "Bể";
+    sortingChart.data.datasets[2].label = "Đen";
+  }
+
   sortingChart.update();
 }
 
@@ -282,4 +537,79 @@ document.addEventListener("DOMContentLoaded", () => {
       .padStart(2, "0")}/${today.getFullYear().toString().slice(-2)}`;
     currentDateElement.textContent = `${formattedDate}`;
   }
+  initChart();
 });
+
+function initChart() {
+  const ctx = document.getElementById("sortingChart").getContext("2d");
+  sortingChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: "Hạt Xanh",
+          data: [],
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
+          fill: false,
+        },
+        {
+          label: "Hạt Hư",
+          data: [],
+          borderColor: "rgb(255, 99, 132)",
+          tension: 0.1,
+          fill: false,
+        },
+        {
+          label: "Dị Vật",
+          data: [],
+          borderColor: "rgb(255, 159, 64)",
+          tension: 0.1,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: "rgba(255, 255, 255, 0.1)",
+          },
+          ticks: {
+            color: "white",
+            stepSize: 5,
+          },
+        },
+        x: {
+          grid: {
+            color: "rgba(255, 255, 255, 0.1)",
+          },
+          ticks: {
+            color: "white",
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: "white",
+          },
+        },
+      },
+    },
+  });
+
+  // Khởi tạo sự kiện cho loại biểu đồ và thang thời gian
+  document
+    .getElementById("chartType")
+    .addEventListener("change", updateChartData);
+  document
+    .getElementById("timeScale")
+    .addEventListener("change", updateChartData);
+
+  // Cập nhật biểu đồ lần đầu
+  updateChartData();
+}
