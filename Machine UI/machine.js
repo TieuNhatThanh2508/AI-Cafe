@@ -88,7 +88,7 @@ function calculateCategoryTotals() {
 }
 
 function startChartUpdate() {
-  let updateFrequency = 60000; // Mặc định cập nhật mỗi phút
+  let updateFrequency = 60000;
   document.getElementById("timeScale").addEventListener("change", (event) => {
     let value = event.target.value;
     if (value === "hourly") updateFrequency = 3600000;
