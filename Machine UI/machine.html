@@ -20,7 +20,7 @@
                             <div class="status-box">
                                 <div class="status-indicator">
                                     <div class="indicator" id="statusIndicator" style="background: green;"></div>
-                                    <span id="statusText">Active</span>
+                                    <span id="statusText">Đang hoạt động</span>
                                 </div>
                                 <video id="liveFeed" width="100%" height="200" style="background: #ddd;"
                                     autoplay></video>
@@ -41,26 +41,15 @@
                     <!-- Tracking Module -->
                     <div class="col-md-6">
                         <div class="module" id="trackingModule">
-                            <h3>Tracking Report (<span id="currentDate"></span>)</h3>
+                            <h3>Báo Cáo Phân Loại (<span id="currentDate"></span>)</h3>
                             <ul class="list-unstyled">
-                                <li>Green: <span id="greenCount">0</span></li>
-                                <li>Defected: <span id="defectedCount">0</span></li>
-                                <li>Foreign Object: <span id="foreignCount">0</span></li>
+                                <li>Hạt Xanh: <span id="greenCount">0</span></li>
+                                <li>Hạt Hư: <span id="defectedCount">0</span></li>
+                                <li>Dị Vật: <span id="foreignCount">0</span></li>
                             </ul>
-                            <div class="dropdown mt-3">
-                                <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownMenuButton"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Export
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <li><button class="dropdown-item" onclick="exportReport('daily')">Daily</button>
-                                    </li>
-                                    <li><button class="dropdown-item" onclick="exportReport('monthly')">Monthly</button>
-                                    </li>
-                                    <li><button class="dropdown-item" onclick="exportReport('yearly')">Yearly</button>
-                                    </li>
-                                </ul>
-                            </div>
+                            <button class="btn btn-warning" type="button" onclick="exportReport('daily')">
+                                Xuất Báo Cáo
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -68,12 +57,12 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="module" id="chartModule">
-                            <h3>Analysis Graph</h3>
+                            <h3>Biểu Đồ Theo Dõi Phân Loại</h3>
                             <select id="timeScale" class="form-select mb-3">
-                                <option value="hourly">Hourly</option>
-                                <option value="tenMinutes">Daily</option>
-                                <option value="monthly">Monthly</option>
-                                <option value="yearly">Yearly</option>
+                                <option value="hourly">Theo Giờ</option>
+                                <option value="Daily">Theo Ngày</option>
+                                <option value="monthly">Theo Tháng</option>
+                                <option value="yearly">Theo Năm</option>
                             </select>
                             <canvas id="sortingChart"></canvas>
                         </div>
@@ -83,33 +72,24 @@
             <div class="col-12 col-md-4">
                 <!-- Defect Module -->
                 <div class="module" id="defectModule">
-                    <h3>Defected Report (<span id="currentDate"></span>)</h3>
+                    <h3>Báo Cáo Bệnh Chi Tiết (<span id="currentDate"></span>)</h3>
                     <div class="search-bar">
-                        <input type="text" id="searchInput" class="form-control" placeholder="Find..."
+                        <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm..."
                             oninput="filterCategories()">
                         <select id="sortOption" class="form-select" onchange="sortCategories()">
-                            <option value="default">Default</option>
-                            <option value="alphabet">Alphabetical</option>
-                            <option value="count">By Count</option>
+                            <option value="default">Mặc Định</option>
+                            <option value="count">Theo Số Lượng</option>
                         </select>
                     </div>
                     <ul id="categoryList" class="category-list">
-                        <li>Cate A (<span id="cateA-count">0</span>)
+                        <li>Hư (<span id="defected-count">0</span>)
                             <ul class="sub-category">
-                                <li>Cate A1 (<span id="cateA1-count">0</span>)</li>
-                                <li>Cate A2 (<span id="cateA2-count">0</span>)</li>
-                                <li>Cate A3 (<span id="cateA3-count">0</span>)</li>
-                            </ul>
-                        </li>
-                        <li>Cate B (<span id="cateB-count">0</span>)
-                            <ul class="sub-category">
-                                <li>Cate B1 (<span id="cateB1-count">0</span>)</li>
-                                <li>Cate B2 (<span id="cateB2-count">0</span>)</li>
-                                <li>Cate B3 (<span id="cateB3-count">0</span>)</li>
+                                <li>Sâu (<span id="worm-count">0</span>)</li>
+                                <li>Bể (<span id="crack-count">0</span>)</li>
+                                <li>Đen (<span id="black-count">0</span>)</li>
                             </ul>
                         </li>
                     </ul>
-                    <button class="btn btn-light mt-2" onclick="loadMoreCategories()">Click to see more</button>
                 </div>
             </div>
         </div>

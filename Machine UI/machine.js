@@ -1,16 +1,17 @@
 let machineRunning = false;
 let progress = 0;
 let sortingChart;
+
+// Đồng bộ defectCounts với các phần tử HTML
 let defectCounts = {
-  cateA1: 0,
-  cateA2: 0,
-  cateA3: 0,
-  cateB1: 0,
-  cateB2: 0,
-  cateB3: 0,
-  foreignObject: 0,
   greenObject: 0,
+  defected: 0,
+  worm: 0,
+  crack: 0,
+  black: 0,
+  foreignObject: 0,
 };
+
 calculateCategoryTotals();
 
 function random(max) {
@@ -25,14 +26,14 @@ function updateStatus(color, text) {
 function startMachine() {
   if (machineRunning) return;
   machineRunning = true;
-  updateStatus("green", "Active");
+  updateStatus("green", "Đang hoạt động");
   runSortingProcess();
   startChartUpdate();
 }
 
 function stopMachine() {
   machineRunning = false;
-  updateStatus("red", "Stopped");
+  updateStatus("red", "Đã dừng");
 }
 
 function runSortingProcess() {
@@ -56,10 +57,7 @@ function classifyBean() {
   if (type < 6) {
     defectCounts.greenObject++;
   } else if (type < 8) {
-    let defectCategory = `cateA${random(3) + 1}`;
-    defectCounts[defectCategory]++;
-  } else if (type < 10) {
-    let defectCategory = `cateB${random(3) + 1}`;
+    let defectCategory = ["worm", "crack", "black"][random(3)];
     defectCounts[defectCategory]++;
   } else {
     defectCounts.foreignObject++;
@@ -73,18 +71,18 @@ function updateCounts() {
     const element = document.getElementById(`${key}-count`);
     if (element) element.innerText = defectCounts[key];
   });
+
+  // Cập nhật các giá trị tổng hợp
   document.getElementById("greenCount").innerText = defectCounts.greenObject;
   document.getElementById("defectedCount").innerText =
-    defectCounts.cateA + defectCounts.cateB;
+    defectCounts.worm + defectCounts.crack + defectCounts.black;
   document.getElementById("foreignCount").innerText =
     defectCounts.foreignObject;
 }
 
 function calculateCategoryTotals() {
-  defectCounts.cateA =
-    defectCounts.cateA1 + defectCounts.cateA2 + defectCounts.cateA3;
-  defectCounts.cateB =
-    defectCounts.cateB1 + defectCounts.cateB2 + defectCounts.cateB3;
+  defectCounts.defected =
+    defectCounts.worm + defectCounts.crack + defectCounts.black;
 }
 
 function startChartUpdate() {
@@ -104,29 +102,21 @@ function startChartUpdate() {
 function updateChartModule() {
   sortingChart.data.labels.push(new Date().toLocaleTimeString());
   sortingChart.data.datasets[0].data.push(defectCounts.greenObject);
-  sortingChart.data.datasets[1].data.push(
-    defectCounts.cateA + defectCounts.cateB
-  );
+  sortingChart.data.datasets[1].data.push(defectCounts.defected);
   sortingChart.data.datasets[2].data.push(defectCounts.foreignObject);
   sortingChart.update();
 }
 
 function exportReport(type) {
   calculateCategoryTotals();
-  const defectTotal = defectCounts.cateA + defectCounts.cateB;
   const data = [
-    ["Categories", "Number", "Sum"],
-    ["Green", "", defectCounts.greenObject],
-    ["Defected", "", defectTotal],
-    ["Defect A", defectCounts.cateA, ""],
-    ["", "Defect A1", defectCounts.cateA1],
-    ["", "Defect A2", defectCounts.cateA2],
-    ["", "Defect A3", defectCounts.cateA3],
-    ["Defect B", defectCounts.cateB, ""],
-    ["", "Defect B1", defectCounts.cateB1],
-    ["", "Defect B2", defectCounts.cateB2],
-    ["", "Defect B3", defectCounts.cateB3],
-    ["Foreign Object", defectCounts.foreignObject, ""],
+    ["Categories", "Number"],
+    ["Green", defectCounts.greenObject],
+    ["Defected", defectCounts.defected],
+    ["Worm", defectCounts.worm],
+    ["Crack", defectCounts.crack],
+    ["Black", defectCounts.black],
+    ["Foreign Object", defectCounts.foreignObject],
   ];
 
   const ws = XLSX.utils.aoa_to_sheet(data);
