@@ -1,6 +1,11 @@
 let machineRunning = false;
 let progress = 0;
 let sortingChart;
+let trackingData = {
+  tracking1: {},
+  tracking2: {},
+  lastNumber: 0,
+};
 
 // Đồng bộ defectCounts với các phần tử HTML
 let defectCounts = {
@@ -23,17 +28,150 @@ function updateStatus(color, text) {
   document.getElementById("statusText").innerText = text;
 }
 
+function getCurrentDateString() {
+  const now = new Date();
+  return `${now.getFullYear().toString().slice(-2)}/${(now.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}/${now.getDate().toString().padStart(2, "0")}`;
+}
+
+function getCurrentDateTimeString() {
+  const now = new Date();
+  return `${now.getFullYear().toString().slice(-2)}/${(now.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}/${now.getDate().toString().padStart(2, "0")}/${now
+    .getHours()
+    .toString()
+    .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now
+    .getSeconds()
+    .toString()
+    .padStart(2, "0")}`;
+}
+
+function saveTrackingData() {
+  const dateStr = getCurrentDateString();
+
+  // Save tracking1 data
+  const tracking1Blob = new Blob(
+    [JSON.stringify(trackingData.tracking1, null, 2)],
+    {
+      type: "application/json",
+    }
+  );
+  const tracking1URL = window.URL.createObjectURL(tracking1Blob);
+  const tracking1Link = document.createElement("a");
+  tracking1Link.href = tracking1URL;
+  tracking1Link.download = `tracking1.json_${dateStr}`;
+  document.body.appendChild(tracking1Link);
+  tracking1Link.click();
+  document.body.removeChild(tracking1Link);
+  window.URL.revokeObjectURL(tracking1URL);
+
+  // Save tracking2 data
+  const tracking2Blob = new Blob(
+    [JSON.stringify(trackingData.tracking2, null, 2)],
+    {
+      type: "application/json",
+    }
+  );
+  const tracking2URL = window.URL.createObjectURL(tracking2Blob);
+  const tracking2Link = document.createElement("a");
+  tracking2Link.href = tracking2URL;
+  tracking2Link.download = `tracking2.json_${dateStr}`;
+  document.body.appendChild(tracking2Link);
+  tracking2Link.click();
+  document.body.removeChild(tracking2Link);
+  window.URL.revokeObjectURL(tracking2URL);
+}
+
+function updateTrackingData() {
+  if (!machineRunning) return;
+
+  // Lưu các giá trị tạm thời để tránh thay đổi trong quá trình xử lý
+  const currentGreen = defectCounts.greenObject;
+  const currentForeign = defectCounts.foreignObject;
+  const currentWorm = defectCounts.worm;
+  const currentCrack = defectCounts.crack;
+  const currentBlack = defectCounts.black;
+
+  const dateTimeStr = getCurrentDateTimeString();
+
+  // Ghi nhận hạt Xanh
+  if (currentGreen > 0) {
+    trackingData.lastNumber++;
+    trackingData.tracking1[dateTimeStr] = {
+      "No.": trackingData.lastNumber,
+      status: "Xanh",
+    };
+  }
+
+  // Ghi nhận hạt Dị Vật
+  if (currentForeign > 0) {
+    trackingData.lastNumber++;
+    trackingData.tracking1[dateTimeStr] = {
+      "No.": trackingData.lastNumber,
+      status: "Dị Vật",
+    };
+  }
+
+  // Ghi nhận hạt Sâu (vào cả 2 file)
+  if (currentWorm > 0) {
+    trackingData.lastNumber++;
+    trackingData.tracking1[dateTimeStr] = {
+      "No.": trackingData.lastNumber,
+      status: "Hư",
+    };
+    trackingData.tracking2[dateTimeStr] = {
+      "No.": trackingData.lastNumber,
+      status: "Sâu",
+    };
+  }
+
+  // Ghi nhận hạt Bể (vào cả 2 file)
+  if (currentCrack > 0) {
+    trackingData.lastNumber++;
+    trackingData.tracking1[dateTimeStr] = {
+      "No.": trackingData.lastNumber,
+      status: "Hư",
+    };
+    trackingData.tracking2[dateTimeStr] = {
+      "No.": trackingData.lastNumber,
+      status: "Bể",
+    };
+  }
+
+  // Ghi nhận hạt Đen (vào cả 2 file)
+  if (currentBlack > 0) {
+    trackingData.lastNumber++;
+    trackingData.tracking1[dateTimeStr] = {
+      "No.": trackingData.lastNumber,
+      status: "Hư",
+    };
+    trackingData.tracking2[dateTimeStr] = {
+      "No.": trackingData.lastNumber,
+      status: "Đen",
+    };
+  }
+}
+
 function startMachine() {
   if (machineRunning) return;
   machineRunning = true;
   updateStatus("green", "Đang hoạt động");
   runSortingProcess();
   startChartUpdate();
+  // Reset tracking data when starting
+  trackingData = {
+    tracking1: {},
+    tracking2: {},
+    lastNumber: 0,
+  };
 }
 
 function stopMachine() {
   machineRunning = false;
   updateStatus("red", "Đã dừng");
+  saveTrackingData();
 }
 
 function runSortingProcess() {
@@ -64,6 +202,7 @@ function classifyBean() {
   }
   calculateCategoryTotals();
   updateCounts();
+  updateTrackingData();
 }
 
 function updateCounts() {

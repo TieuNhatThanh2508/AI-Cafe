@@ -48,7 +48,7 @@ function analyzeImage() {
       clearInterval(interval);
 
       let result = Math.floor(Math.random() * 101);
-      statusElement.innerText = "Ripe " + result + "%";
+      statusElement.innerText = "Chín " + result + "%";
 
       if (result >= 0 && result <= 30) {
         statusElement.style.background = "red";

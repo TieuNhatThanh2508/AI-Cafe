@@ -22,41 +22,41 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav">
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">Login / Signup <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="#">Đăng Nhập / Đăng Kí <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Home</a>
+                    <a class="nav-link" href="#">Trang Chủ</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">About Us</a>
+                    <a class="nav-link" href="#">Về Chúng Tôi</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Pricing</a>
+                    <a class="nav-link" href="#">Dịch Vụ</a>
                 </li>
             </ul>
         </div>
     </nav>
     <div class="container">
-        <label for="imageUpload" class="image-placeholder" id="imagePlaceholder">Add Image</label>
+        <label for="imageUpload" class="image-placeholder" id="imagePlaceholder">Thêm Hình Ảnh</label>
         <input type="file" id="imageUpload" accept="image/*" onchange="previewImage()">
         <img id="uploadedImage" alt="Uploaded Image">
         <div class="button-container">
-            <button type="button" class="btn btn-warning retake" onclick="resetUpload()">Retake</button>
-            <button type="button" class="btn btn-success send" onclick="analyzeImage()">Send</button>
+            <button type="button" class="btn btn-warning retake" onclick="resetUpload()">Chụp Lại</button>
+            <button type="button" class="btn btn-success send" onclick="analyzeImage()">Gửi</button>
         </div>
 
         <div class="progress-container">
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Choose Model
+                    Chọn Mô Hình
                 </button>
                 <div class="dropdown-menu" id="modelSelect" aria-labelledby="dropdownMenuButton">
-                    <button class="dropdown-item" type="button" onclick="selectModel('Model / Service A')">Model /
-                        Service
+                    <button class="dropdown-item" type="button" onclick="selectModel('Model / Service A')">Mô Hình /
+                        Dịch Vụ
                         A</button>
-                    <button class="dropdown-item" type="button" onclick="selectModel('Model / Service B')">Model /
-                        Service
+                    <button class="dropdown-item" type="button" onclick="selectModel('Model / Service B')">Mô Hình /
+                        Dịch Vụ
                         B</button>
                 </div>
             </div>
@@ -66,7 +66,7 @@
             </div>
             <p id="progressText">0%</p>
         </div>
-        <div class="status" id="status">Waiting for analysis...</div>
+        <div class="status" id="status">Đang Chờ Xử Lý...</div>
     </div>
     <script src="web.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
