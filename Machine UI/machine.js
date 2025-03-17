@@ -1,5 +1,5 @@
-let machineRunning = true;
-let progress = 67;
+let machineRunning = false;
+let progress = 0;
 let sortingChart;
 let defectCounts = {
   cateA1: 0,
@@ -23,8 +23,11 @@ function updateStatus(color, text) {
 }
 
 function startMachine() {
+  if (machineRunning) return;
   machineRunning = true;
   updateStatus("green", "Active");
+  runSortingProcess();
+  startChartUpdate();
 }
 
 function stopMachine() {
@@ -32,108 +35,37 @@ function stopMachine() {
   updateStatus("red", "Stopped");
 }
 
-function monitorMachine() {
-  if (machineRunning && progress < 20) {
-    updateStatus("yellow", "Error");
-  }
-}
-setInterval(monitorMachine, 3000);
+function runSortingProcess() {
+  if (!machineRunning) return;
+  progress = 0;
+  let interval = setInterval(() => {
+    progress += 10;
+    document.getElementById("progressBar").style.width = progress + "%";
+    document.getElementById("progressText").innerText = progress + "%";
 
-document.getElementById("currentDate").innerText =
-  new Date().toLocaleDateString();
-updateCounts();
-
-document
-  .getElementById("timeScale")
-  .addEventListener("change", (e) => updateChart(e.target.value));
-updateChart("hourly");
-
-function generateData(scale) {
-  const maxRange = { hourly: 24, daily: 30, weekly: 7, monthly: 12, yearly: 5 }[
-    scale
-  ];
-  return {
-    labels: Array.from({ length: maxRange }, (_, i) => i + 1),
-    greenData: Array(maxRange).fill(0),
-    defectedData: Array(maxRange).fill(0),
-    foreignData: Array(maxRange).fill(0),
-  };
-}
-
-function updateChart(scale) {
-  const data = generateData(scale);
-  if (sortingChart) sortingChart.destroy();
-
-  sortingChart = new Chart(
-    document.getElementById("sortingChart").getContext("2d"),
-    {
-      type: "line",
-      data: {
-        labels: data.labels,
-        datasets: [
-          {
-            label: "Green",
-            data: data.greenData,
-            borderColor: "cyan",
-            borderWidth: 2,
-          },
-          {
-            label: "Defected",
-            data: data.defectedData,
-            borderColor: "red",
-            borderWidth: 2,
-          },
-          {
-            label: "Foreign Object",
-            data: data.foreignData,
-            borderColor: "yellow",
-            borderWidth: 2,
-          },
-        ],
-      },
-      options: { responsive: true },
+    if (progress >= 100) {
+      clearInterval(interval);
+      classifyBean();
+      setTimeout(runSortingProcess, 1000);
     }
-  );
+  }, 100);
 }
 
-function updateChartModule() {
+function classifyBean() {
+  let type = random(10);
+  if (type < 6) {
+    defectCounts.greenObject++;
+  } else if (type < 8) {
+    let defectCategory = `cateA${random(3) + 1}`;
+    defectCounts[defectCategory]++;
+  } else if (type < 10) {
+    let defectCategory = `cateB${random(3) + 1}`;
+    defectCounts[defectCategory]++;
+  } else {
+    defectCounts.foreignObject++;
+  }
   calculateCategoryTotals();
-  sortingChart.data.labels.push(new Date().toLocaleTimeString());
-  sortingChart.data.datasets[0].data.push(defectCounts.greenObject);
-  sortingChart.data.datasets[1].data.push(
-    defectCounts.cateA + defectCounts.cateB
-  );
-  sortingChart.data.datasets[2].data.push(defectCounts.foreignObject);
-  sortingChart.update();
-}
-
-function exportReport(type) {
-  calculateCategoryTotals();
-  const defectA =
-    defectCounts.cateA1 + defectCounts.cateA2 + defectCounts.cateA3;
-  const defectB =
-    defectCounts.cateB1 + defectCounts.cateB2 + defectCounts.cateB3;
-  const defectTotal = defectA + defectB;
-
-  const data = [
-    ["Categories", "Number", "Sum"],
-    ["Green", "", defectCounts.greenObject],
-    ["Defected", "", defectTotal],
-    ["Defect A", defectA, ""],
-    ["", "Defect A1", defectCounts.cateA1],
-    ["", "Defect A2", defectCounts.cateA2],
-    ["", "Defect A3", defectCounts.cateA3],
-    ["Defect B", defectB, ""],
-    ["", "Defect B1", defectCounts.cateB1],
-    ["", "Defect B2", defectCounts.cateB2],
-    ["", "Defect B3", defectCounts.cateB3],
-    ["Foreign Object", defectCounts.foreignObject, ""],
-  ];
-
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Report");
-  XLSX.writeFile(wb, `sorting_report_${type}.xlsx`);
+  updateCounts();
 }
 
 function updateCounts() {
@@ -150,29 +82,61 @@ function updateCounts() {
 
 function calculateCategoryTotals() {
   defectCounts.cateA =
-    (defectCounts.cateA1 || 0) +
-    (defectCounts.cateA2 || 0) +
-    (defectCounts.cateA3 || 0);
+    defectCounts.cateA1 + defectCounts.cateA2 + defectCounts.cateA3;
   defectCounts.cateB =
-    (defectCounts.cateB1 || 0) +
-    (defectCounts.cateB2 || 0) +
-    (defectCounts.cateB3 || 0);
+    defectCounts.cateB1 + defectCounts.cateB2 + defectCounts.cateB3;
 }
 
-function updateRandomCategory() {
-  const categories = Object.keys(defectCounts);
-  const randomCategory = categories[random(categories.length)];
-  defectCounts[randomCategory] += 1;
+function startChartUpdate() {
+  let updateFrequency = 60000; // Mặc định cập nhật mỗi phút
+  document.getElementById("timeScale").addEventListener("change", (event) => {
+    let value = event.target.value;
+    if (value === "hourly") updateFrequency = 3600000;
+    else if (value === "tenMinutes") updateFrequency = 600000;
+    else updateFrequency = 60000;
+  });
+
+  setInterval(() => {
+    if (machineRunning) updateChartModule();
+  }, updateFrequency);
+}
+
+function updateChartModule() {
+  sortingChart.data.labels.push(new Date().toLocaleTimeString());
+  sortingChart.data.datasets[0].data.push(defectCounts.greenObject);
+  sortingChart.data.datasets[1].data.push(
+    defectCounts.cateA + defectCounts.cateB
+  );
+  sortingChart.data.datasets[2].data.push(defectCounts.foreignObject);
+  sortingChart.update();
+}
+
+function exportReport(type) {
   calculateCategoryTotals();
-  updateCounts();
-}
+  const defectTotal = defectCounts.cateA + defectCounts.cateB;
+  const data = [
+    ["Categories", "Number", "Sum"],
+    ["Green", "", defectCounts.greenObject],
+    ["Defected", "", defectTotal],
+    ["Defect A", defectCounts.cateA, ""],
+    ["", "Defect A1", defectCounts.cateA1],
+    ["", "Defect A2", defectCounts.cateA2],
+    ["", "Defect A3", defectCounts.cateA3],
+    ["Defect B", defectCounts.cateB, ""],
+    ["", "Defect B1", defectCounts.cateB1],
+    ["", "Defect B2", defectCounts.cateB2],
+    ["", "Defect B3", defectCounts.cateB3],
+    ["Foreign Object", defectCounts.foreignObject, ""],
+  ];
 
-setInterval(updateRandomCategory, 1000);
-setInterval(updateChartModule, 10000);
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Report");
+  XLSX.writeFile(wb, `sorting_report_${type}.xlsx`);
+}
 
 function resetValues() {
   Object.keys(defectCounts).forEach((key) => (defectCounts[key] = 0));
   updateCounts();
-  updateChartModule();
 }
 resetValues();
