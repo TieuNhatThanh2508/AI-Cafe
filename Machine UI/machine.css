@@ -72,3 +72,26 @@ body {
 .sub-category {
     margin-left: 20px;
 }
+
+/* Add styles for sorted list items */
+.category-list > li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-list > li:last-child {
+    border-bottom: none;
+}
+
+/* Style for when items are sorted */
+.category-list.sorted > li {
+    padding: 8px;
+    margin: 4px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.category-list.sorted > li:hover {
+    background: rgba(255, 255, 255, 0.1);
+}

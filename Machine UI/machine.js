@@ -613,3 +613,48 @@ function initChart() {
   // Cập nhật biểu đồ lần đầu
   updateChartData();
 }
+
+function sortCategories() {
+  const sortOption = document.getElementById("sortOption").value;
+  const categoryList = document.getElementById("categoryList");
+  const mainCategory = categoryList.querySelector("li:first-child");
+  const subCategories = Array.from(
+    categoryList.querySelectorAll(".sub-category li")
+  );
+
+  if (sortOption === "count") {
+    // Hide main category when sorting by count
+    mainCategory.style.display = "none";
+
+    // Sort subcategories by their count values
+    subCategories.sort((a, b) => {
+      const countA = parseInt(a.querySelector("span").textContent);
+      const countB = parseInt(b.querySelector("span").textContent);
+      return countB - countA; // Sort in descending order
+    });
+
+    // Move sorted subcategories to the main list
+    const subCategoryList = document.createElement("ul");
+    subCategoryList.className = "category-list sorted";
+    subCategories.forEach((item) => {
+      subCategoryList.appendChild(item.cloneNode(true));
+    });
+
+    // Replace the old list with the new sorted list
+    categoryList.innerHTML = "";
+    categoryList.appendChild(subCategoryList);
+  } else {
+    // Restore default view
+    categoryList.innerHTML = `
+        <li>Hư (<span id="defected-count">0</span>)
+            <ul class="sub-category">
+                <li>Sâu (<span id="worm-count">${defectCounts.worm}</span>)</li>
+                <li>Bể (<span id="crack-count">${defectCounts.crack}</span>)</li>
+                <li>Đen (<span id="black-count">${defectCounts.black}</span>)</li>
+            </ul>
+        </li>
+    `;
+    calculateCategoryTotals();
+    updateCounts();
+  }
+}
