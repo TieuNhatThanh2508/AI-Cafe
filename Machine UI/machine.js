@@ -1,6 +1,6 @@
 let machineRunning = false;
 let progress = 0;
-let sortingChart;
+let sortingChart, sortingChart2;
 let trackingData = {
   tracking1: {},
   tracking2: {},
@@ -451,50 +451,6 @@ function updateChartData() {
 
   sortingChart.update();
 }
-const chartSourceSelect = document.getElementById("chartSource");
-const importedExcelInput = document.getElementById("importedExcel");
-chartSourceSelect.addEventListener("change", (e) => {
-  if (e.target.value === "import") {
-    importedExcelInput.style.display = "block";
-  } else {
-    importedExcelInput.style.display = "none";
-    updateChartData();
-  }
-});
-
-importedExcelInput.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const data = await file.arrayBuffer();
-  const workbook = XLSX.read(data);
-  const sheetName = workbook.SheetNames[1];
-  const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-  // Chuyển jsonData thành dữ liệu biểu đồ đơn giản
-  const timestamps = jsonData.map((row) => row.Timestamp);
-  const categories = ["Xanh", "Dị Vật", "Sâu", "Bể", "Đen"];
-  const datasetMap = {};
-  categories.forEach(
-    (cat) => (datasetMap[cat] = Array(timestamps.length).fill(0))
-  );
-
-  jsonData.forEach((row, idx) => {
-    const label = row["Phân loại"];
-    if (datasetMap[label] !== undefined) datasetMap[label][idx] = 1;
-  });
-
-  sortingChart.data.labels = timestamps;
-  sortingChart.data.datasets = categories.map((cat, i) => ({
-    label: cat,
-    data: datasetMap[cat],
-    borderColor: `hsl(${i * 70}, 70%, 60%)`,
-    tension: 0.1,
-    fill: false,
-  }));
-
-  sortingChart.update();
-});
 
 function exportReport(type) {
   try {
@@ -624,6 +580,43 @@ function initChart() {
       },
     },
   });
+  const ctx2 = document.getElementById("sortingChart2").getContext("2d");
+  sortingChart2 = new Chart(ctx2, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: "rgba(255, 255, 255, 0.1)",
+          },
+          ticks: {
+            color: "white",
+          },
+        },
+        x: {
+          grid: {
+            color: "rgba(255, 255, 255, 0.1)",
+          },
+          ticks: {
+            color: "white",
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: "white",
+          },
+        },
+      },
+    },
+  });
 
   // Khởi tạo sự kiện cho loại biểu đồ và thang thời gian
   document
@@ -632,6 +625,15 @@ function initChart() {
   document
     .getElementById("timeScale")
     .addEventListener("change", updateChartData);
+  document.getElementById("chartType2").addEventListener("change", () => {
+    const input = document.getElementById("importedExcel2");
+    input.dispatchEvent(new Event("change"));
+  });
+
+  document.getElementById("timeScale2").addEventListener("change", () => {
+    const input = document.getElementById("importedExcel2");
+    input.dispatchEvent(new Event("change"));
+  });
 
   // Cập nhật biểu đồ lần đầu
   updateChartData();
@@ -681,3 +683,72 @@ function sortCategories() {
     updateCounts();
   }
 }
+document
+  .getElementById("importedExcel2")
+  .addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data);
+    const sheetName =
+      workbook.SheetNames.find((name) =>
+        name.toLowerCase().includes("chi tiết")
+      ) || workbook.SheetNames[1];
+    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    const chartType2 = document.getElementById("chartType2").value; // "overview" hoặc "detail"
+    const timeScale2 = document.getElementById("timeScale2").value; // "hour" hoặc "minute"
+
+    const timeGroupedData = {};
+    const categories =
+      chartType2 === "overview"
+        ? ["Xanh", "Dị Vật", "Hư"]
+        : ["Sâu", "Bể", "Đen"];
+
+    jsonData.forEach((row) => {
+      const ts = row.Timestamp;
+      const label = row["Phân loại"]?.trim();
+      if (!ts || !label) return;
+
+      // Parse từ "25/04/02/23:52:14_13" -> "23:52"
+      const parts = ts.split("/");
+      if (parts.length < 4 || !parts[3].includes(":")) return;
+
+      const [hour, minute] = parts[3].split(":");
+      let timeLabel = timeScale2 === "hour" ? hour : `${hour}:${minute}`;
+
+      if (!timeGroupedData[timeLabel]) {
+        timeGroupedData[timeLabel] = {
+          Xanh: 0,
+          "Dị Vật": 0,
+          Sâu: 0,
+          Bể: 0,
+          Đen: 0,
+          Hư: 0, // phòng trường hợp chartType2 là overview
+        };
+      }
+
+      if (label === "Xanh" || label === "Dị Vật") {
+        timeGroupedData[timeLabel][label]++;
+      } else if (["Sâu", "Bể", "Đen"].includes(label)) {
+        timeGroupedData[timeLabel][label]++;
+        if (chartType2 === "overview") {
+          timeGroupedData[timeLabel]["Hư"]++;
+        }
+      }
+    });
+
+    const sortedLabels = Object.keys(timeGroupedData).sort();
+
+    sortingChart2.data.labels = sortedLabels;
+    sortingChart2.data.datasets = categories.map((cat, i) => ({
+      label: cat,
+      data: sortedLabels.map((t) => timeGroupedData[t][cat] || 0),
+      borderColor: `hsl(${i * 70}, 70%, 60%)`,
+      tension: 0.1,
+      fill: false,
+    }));
+
+    sortingChart2.update();
+  });

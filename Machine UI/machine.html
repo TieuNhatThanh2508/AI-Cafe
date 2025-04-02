@@ -53,36 +53,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Chart Module -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="module" id="chartModule">
-                            <h3>Biểu Đồ Theo Dõi Phân Loại (Máy 1)</h3>
-                            <select id="chartSource" class="form-select mt-2">
-                                <option value="live">Dữ liệu Thực</option>
-                                <option value="import">Từ File Excel</option>
-                            </select>
-                            <input type="file" id="importedExcel" accept=".xlsx" class="form-control mt-2"
-                                style="display: none;">
-                            <div class="mb-3">
-                                <label class="form-label">Loại Biểu Đồ</label>
-                                <select id="chartType" class="form-select mb-2">
-                                    <option value="overview">Tổng Quát</option>
-                                    <option value="detail">Chi Tiết Bệnh</option>
-                                </select>
-                                <label class="form-label">Thời Gian</label>
-                                <select id="timeScale">
-                                    <option value="hour">Theo Giờ</option>
-                                    <option value="day">Theo Ngày</option>
-                                    <!-- <option value="week">Theo Tuần</option>
-                                    <option value="month">Theo Tháng</option>
-                                    <option value="year">Theo Năm</option> -->
-                                </select>
-                            </div>
-                            <canvas id="sortingChart"></canvas>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="col-12 col-md-4">
                 <!-- Defect Module -->
@@ -105,6 +75,45 @@
                             </ul>
                         </li>
                     </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Chart Module -->
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="module" id="chartModule">
+                    <h3>Biểu Đồ Theo Dõi Phân Loại Trực Tiếp (Máy 1)</h3>
+                    <div class="mb-3">
+                        <label class="form-label">Loại Biểu Đồ</label>
+                        <select id="chartType" class="form-select mb-2">
+                            <option value="overview">Tổng Quát</option>
+                            <option value="detail">Chi Tiết Bệnh</option>
+                        </select>
+                        <label class="form-label">Thời Gian</label>
+                        <select id="timeScale">
+                            <option value="hour">Theo Giờ</option>
+                            <option value="day">Theo Ngày</option>
+                        </select>
+                    </div>
+                    <canvas id="sortingChart"></canvas>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="module" id="chartModule">
+                    <h3>Biểu Đồ Theo Dõi Phân Loại Theo File</h3>
+                    <input type="file" id="importedExcel2" accept=".xlsx" class="form-control mt-2">
+                    <div class="mb-3">
+                        <label class="form-label">Loại Biểu Đồ</label>
+                        <select id="chartType2" class="form-select mb-2">
+                            <option value="overview">Tổng Quát</option>
+                            <option value="detail">Chi Tiết Bệnh</option>
+                        </select>
+                        <select id="timeScale2">
+                            <option value="minute">Theo Phút</option>
+                            <option value="hour">Theo Giờ</option>
+                        </select>
+                    </div>
+                    <canvas id="sortingChart2"></canvas>
                 </div>
             </div>
         </div>
