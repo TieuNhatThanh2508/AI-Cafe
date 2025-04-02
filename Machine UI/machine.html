@@ -58,6 +58,12 @@
                     <div class="col-12">
                         <div class="module" id="chartModule">
                             <h3>Biểu Đồ Theo Dõi Phân Loại (Máy 1)</h3>
+                            <select id="chartSource" class="form-select mt-2">
+                                <option value="live">Dữ liệu Thực</option>
+                                <option value="import">Từ File Excel</option>
+                            </select>
+                            <input type="file" id="importedExcel" accept=".xlsx" class="form-control mt-2"
+                                style="display: none;">
                             <div class="mb-3">
                                 <label class="form-label">Loại Biểu Đồ</label>
                                 <select id="chartType" class="form-select mb-2">

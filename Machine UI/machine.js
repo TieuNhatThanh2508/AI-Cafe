@@ -144,72 +144,25 @@ function saveTrackingData() {
   window.URL.revokeObjectURL(tracking2URL);
 }
 
-function updateTrackingData() {
-  if (!machineRunning) return;
-
-  // Lưu các giá trị tạm thời để tránh thay đổi trong quá trình xử lý
-  const currentGreen = defectCounts.greenObject;
-  const currentForeign = defectCounts.foreignObject;
-  const currentWorm = defectCounts.worm;
-  const currentCrack = defectCounts.crack;
-  const currentBlack = defectCounts.black;
+function updateTrackingData(classifiedList) {
+  if (!machineRunning || !classifiedList || !classifiedList.length) return;
 
   const dateTimeStr = getCurrentDateTimeString();
 
-  // Ghi nhận hạt Xanh
-  if (currentGreen > 0) {
+  for (const label of classifiedList) {
     trackingData.lastNumber++;
-    trackingData.tracking1[dateTimeStr] = {
-      "No.": trackingData.lastNumber,
-      status: "Xanh",
-    };
-  }
 
-  // Ghi nhận hạt Dị Vật
-  if (currentForeign > 0) {
-    trackingData.lastNumber++;
-    trackingData.tracking1[dateTimeStr] = {
-      "No.": trackingData.lastNumber,
-      status: "Dị Vật",
-    };
-  }
+    let status1 = label;
+    if (["Sâu", "Bể", "Đen"].includes(label)) status1 = "Hư";
 
-  // Ghi nhận hạt Sâu (vào cả 2 file)
-  if (currentWorm > 0) {
-    trackingData.lastNumber++;
-    trackingData.tracking1[dateTimeStr] = {
+    trackingData.tracking1[`${dateTimeStr}_${trackingData.lastNumber}`] = {
       "No.": trackingData.lastNumber,
-      status: "Hư",
+      status: status1,
     };
-    trackingData.tracking2[dateTimeStr] = {
-      "No.": trackingData.lastNumber,
-      status: "Sâu",
-    };
-  }
 
-  // Ghi nhận hạt Bể (vào cả 2 file)
-  if (currentCrack > 0) {
-    trackingData.lastNumber++;
-    trackingData.tracking1[dateTimeStr] = {
+    trackingData.tracking2[`${dateTimeStr}_${trackingData.lastNumber}`] = {
       "No.": trackingData.lastNumber,
-      status: "Hư",
-    };
-    trackingData.tracking2[dateTimeStr] = {
-      "No.": trackingData.lastNumber,
-      status: "Bể",
-    };
-  }
-
-  // Ghi nhận hạt Đen (vào cả 2 file)
-  if (currentBlack > 0) {
-    trackingData.lastNumber++;
-    trackingData.tracking1[dateTimeStr] = {
-      "No.": trackingData.lastNumber,
-      status: "Hư",
-    };
-    trackingData.tracking2[dateTimeStr] = {
-      "No.": trackingData.lastNumber,
-      status: "Đen",
+      status: label,
     };
   }
 }
@@ -303,11 +256,14 @@ function runSortingProcess() {
 }
 
 function classifyBean() {
+  const now = new Date();
+  const newClasses = [];
+
   let type = random(10);
   if (type < 6) {
     defectCounts.greenObject++;
-    // Cập nhật dữ liệu theo thời gian
-    const now = new Date();
+    newClasses.push("Xanh");
+
     timeSeriesData.hour[now.getMinutes()].green++;
     timeSeriesData.day[now.getHours()].green++;
     timeSeriesData.week[now.getDay()].green++;
@@ -316,46 +272,41 @@ function classifyBean() {
   } else if (type < 8) {
     let defectCategory = ["worm", "crack", "black"][random(3)];
     defectCounts[defectCategory]++;
-    // Cập nhật dữ liệu theo thời gian
-    const now = new Date();
+    defectCounts.defected =
+      defectCounts.worm + defectCounts.crack + defectCounts.black;
+
+    const labelMap = {
+      worm: "Sâu",
+      crack: "Bể",
+      black: "Đen",
+    };
+    newClasses.push(labelMap[defectCategory]);
+
     timeSeriesData.hour[now.getMinutes()].defected++;
     timeSeriesData.day[now.getHours()].defected++;
     timeSeriesData.week[now.getDay()].defected++;
     timeSeriesData.month[now.getDate() - 1].defected++;
     timeSeriesData.year[now.getMonth()].defected++;
 
-    if (defectCategory === "worm") {
-      timeSeriesData.hour[now.getMinutes()].worm++;
-      timeSeriesData.day[now.getHours()].worm++;
-      timeSeriesData.week[now.getDay()].worm++;
-      timeSeriesData.month[now.getDate() - 1].worm++;
-      timeSeriesData.year[now.getMonth()].worm++;
-    } else if (defectCategory === "crack") {
-      timeSeriesData.hour[now.getMinutes()].crack++;
-      timeSeriesData.day[now.getHours()].crack++;
-      timeSeriesData.week[now.getDay()].crack++;
-      timeSeriesData.month[now.getDate() - 1].crack++;
-      timeSeriesData.year[now.getMonth()].crack++;
-    } else {
-      timeSeriesData.hour[now.getMinutes()].black++;
-      timeSeriesData.day[now.getHours()].black++;
-      timeSeriesData.week[now.getDay()].black++;
-      timeSeriesData.month[now.getDate() - 1].black++;
-      timeSeriesData.year[now.getMonth()].black++;
-    }
+    timeSeriesData.hour[now.getMinutes()][defectCategory]++;
+    timeSeriesData.day[now.getHours()][defectCategory]++;
+    timeSeriesData.week[now.getDay()][defectCategory]++;
+    timeSeriesData.month[now.getDate() - 1][defectCategory]++;
+    timeSeriesData.year[now.getMonth()][defectCategory]++;
   } else {
     defectCounts.foreignObject++;
-    // Cập nhật dữ liệu theo thời gian
-    const now = new Date();
+    newClasses.push("Dị Vật");
+
     timeSeriesData.hour[now.getMinutes()].foreign++;
     timeSeriesData.day[now.getHours()].foreign++;
     timeSeriesData.week[now.getDay()].foreign++;
     timeSeriesData.month[now.getDate() - 1].foreign++;
     timeSeriesData.year[now.getMonth()].foreign++;
   }
+
   calculateCategoryTotals();
   updateCounts();
-  updateTrackingData();
+  updateTrackingData(newClasses); // << pass data here
 }
 
 function updateCounts() {
@@ -500,24 +451,96 @@ function updateChartData() {
 
   sortingChart.update();
 }
+const chartSourceSelect = document.getElementById("chartSource");
+const importedExcelInput = document.getElementById("importedExcel");
+chartSourceSelect.addEventListener("change", (e) => {
+  if (e.target.value === "import") {
+    importedExcelInput.style.display = "block";
+  } else {
+    importedExcelInput.style.display = "none";
+    updateChartData();
+  }
+});
+
+importedExcelInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data);
+  const sheetName = workbook.SheetNames[1];
+  const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+  // Chuyển jsonData thành dữ liệu biểu đồ đơn giản
+  const timestamps = jsonData.map((row) => row.Timestamp);
+  const categories = ["Xanh", "Dị Vật", "Sâu", "Bể", "Đen"];
+  const datasetMap = {};
+  categories.forEach(
+    (cat) => (datasetMap[cat] = Array(timestamps.length).fill(0))
+  );
+
+  jsonData.forEach((row, idx) => {
+    const label = row["Phân loại"];
+    if (datasetMap[label] !== undefined) datasetMap[label][idx] = 1;
+  });
+
+  sortingChart.data.labels = timestamps;
+  sortingChart.data.datasets = categories.map((cat, i) => ({
+    label: cat,
+    data: datasetMap[cat],
+    borderColor: `hsl(${i * 70}, 70%, 60%)`,
+    tension: 0.1,
+    fill: false,
+  }));
+
+  sortingChart.update();
+});
 
 function exportReport(type) {
-  calculateCategoryTotals();
-  const data = [
-    ["Danh Mục", "Số lượng"],
-    ["Hạt Xanh", defectCounts.greenObject],
-    ["Hạt Hư", defectCounts.defected],
-    ["Dị vật", defectCounts.foreignObject],
-    ["Chi Tiết Bệnh", " "],
-    ["Bị Sâu", defectCounts.worm],
-    ["Bị Bể", defectCounts.crack],
-    ["Bị Đen", defectCounts.black],
-  ];
+  try {
+    const now = new Date();
+    const hours = now.getHours();
+    const filename = `Báo cáo phân loại hạt daily[${hours}-${hours} ${now.getDate()}/${
+      now.getMonth() + 1
+    }/${now.getFullYear()}].xlsx`;
 
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo");
-  XLSX.writeFile(wb, `Báo cáo phân loại hạt ${type}.xlsx`);
+    // Tạo summarySheet
+    const summarySheet = [
+      ["Danh Mục", "Số lượng"],
+      ["Hạt Xanh", defectCounts.greenObject || 0],
+      ["Hạt Hư", defectCounts.defected || 0],
+      ["Dị vật", defectCounts.foreignObject || 0],
+      ["Chi Tiết Bệnh", ""],
+      ["Bị Sâu", defectCounts.worm || 0],
+      ["Bị Bể", defectCounts.crack || 0],
+      ["Bị Đen", defectCounts.black || 0],
+    ];
+
+    // Tạo detailsSheet
+    const detailsSheet = [["STT", "Timestamp", "Phân loại"]];
+    for (const [time, info] of Object.entries(trackingData.tracking2 || {})) {
+      detailsSheet.push([info["No."] || "", time, info.status || ""]);
+    }
+
+    // Tạo workbook và thêm sheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      wb,
+      XLSX.utils.aoa_to_sheet(summarySheet),
+      "Tổng Quan"
+    );
+    XLSX.utils.book_append_sheet(
+      wb,
+      XLSX.utils.aoa_to_sheet(detailsSheet),
+      "Chi Tiết"
+    );
+
+    // Xuất file
+    XLSX.writeFile(wb, filename);
+    console.log(`Báo cáo đã được xuất thành công: ${filename}`);
+  } catch (error) {
+    console.error("Đã xảy ra lỗi khi xuất báo cáo:", error);
+  }
 }
 
 function resetValues() {
