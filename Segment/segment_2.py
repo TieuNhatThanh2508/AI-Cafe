@@ -9,9 +9,9 @@ def get_next_index(output_folder):
     return max(indices, default=0) + 1
 
 # Thư mục chứa ảnh đầu vào và đầu ra
-input_folder = "./input"
-output_folder = "./output"
-output_folder_2 = "./output_2"
+input_folder = "Segment/input"
+output_folder = "Segment/output"
+output_folder_2 = "Segment/output_2"
 
 # Tạo thư mục đầu ra nếu chưa tồn tại
 os.makedirs(output_folder, exist_ok=True)
@@ -33,30 +33,36 @@ else:
         image = cv2.imread(input_path)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         
-        # Làm mờ ảnh để giảm nhiễu
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        # # Làm mờ ảnh để giảm nhiễu
+        # blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         
-        # Áp dụng ngưỡng thích nghi để phát hiện hạt cà phê
+        
+        # # Áp dụng ngưỡng thích nghi để phát hiện hạt cà phê
+        # thresh = cv2.adaptiveThreshold(
+        #     blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
+        # )
+        # Áp dụng ngưỡng thích nghi để phát hiện hạt cà phê không làm mờ
         thresh = cv2.adaptiveThreshold(
-            blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
         )
         
         # Tìm các đường viền của hạt cà phê
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         # Xác định kích thước tối thiểu để lọc những hạt quá nhỏ
-        min_size = 20
-        
+        min_size = 60
+        max_size = 300
+
         image_with_boxes = image.copy()
         
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if w * h > min_size ** 2:
+            if max_size ** 2 > w * h > min_size ** 2:
                 # Vẽ bounding box trên ảnh gốc
                 cv2.rectangle(image_with_boxes, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 
                 # Cắt ảnh hạt cà phê
-                bean = image[y:y + h, x:x + w].copy()
+                bean = image[y:y + h + 10, x:x + 10 + w].copy()
                 
                 # Resize về 224x224
                 bean_resized = cv2.resize(bean, (224, 224))
