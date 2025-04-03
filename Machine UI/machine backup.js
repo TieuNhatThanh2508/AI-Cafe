@@ -8,6 +8,7 @@ let trackingData = {
 };
 let pieChartClassification, pieChartDefects;
 
+// Đồng bộ defectCounts với các phần tử HTML
 let defectCounts = {
   greenObject: 0,
   defected: 0,
@@ -17,6 +18,7 @@ let defectCounts = {
   foreignObject: 0,
 };
 
+// Thêm biến để lưu trữ dữ liệu theo thời gian
 let timeSeriesData = {
   hour: Array(60)
     .fill()
@@ -72,6 +74,7 @@ let timeSeriesData = {
 
 calculateCategoryTotals();
 
+// Thêm biến để lưu trữ chart configuration
 let chartConfig = {
   type: "overview",
   timeScale: "hourly",
