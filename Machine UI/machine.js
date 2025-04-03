@@ -6,6 +6,7 @@ let trackingData = {
   tracking2: {},
   lastNumber: 0,
 };
+let pieChartClassification, pieChartDefects;
 
 // Đồng bộ defectCounts với các phần tử HTML
 let defectCounts = {
@@ -321,6 +322,7 @@ function updateCounts() {
     defectCounts.worm + defectCounts.crack + defectCounts.black;
   document.getElementById("foreignCount").innerText =
     defectCounts.foreignObject;
+  updatePieCharts();
 }
 
 function calculateCategoryTotals() {
@@ -502,6 +504,7 @@ function exportReport(type) {
 function resetValues() {
   Object.keys(defectCounts).forEach((key) => (defectCounts[key] = 0));
   updateCounts();
+  updatePieCharts();
 }
 resetValues();
 
@@ -637,6 +640,69 @@ function initChart() {
 
   // Cập nhật biểu đồ lần đầu
   updateChartData();
+  // Biểu đồ tròn Tổng Quát
+  const pie1 = document
+    .getElementById("pieChartClassification")
+    .getContext("2d");
+  pieChartClassification = new Chart(pie1, {
+    type: "pie",
+    data: {
+      labels: ["Hạt Xanh", "Hạt Hư", "Dị Vật"],
+      datasets: [
+        {
+          data: [0, 0, 0],
+          backgroundColor: ["#4bc0c0", "#ff6384", "#ffcd56"],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom", // 👈 Legend hiển thị dưới biểu đồ
+          labels: {
+            color: "white",
+            boxWidth: 15,
+            padding: 10,
+            font: {
+              size: 12,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Biểu đồ tròn Chi Tiết Bệnh
+  const pie2 = document.getElementById("pieChartDefects").getContext("2d");
+  pieChartDefects = new Chart(pie2, {
+    type: "pie",
+    data: {
+      labels: ["Sâu", "Bể", "Đen"],
+      datasets: [
+        {
+          data: [0, 0, 0],
+          backgroundColor: ["#36a2eb", "#9966ff", "#ff9f40"],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            color: "white",
+            boxWidth: 15,
+            padding: 10,
+            font: {
+              size: 12,
+            },
+          },
+        },
+      },
+    },
+  });
 }
 
 function sortCategories() {
@@ -752,3 +818,24 @@ document
 
     sortingChart2.update();
   });
+function updatePieCharts() {
+  // Cập nhật biểu đồ phân loại
+  if (pieChartClassification) {
+    pieChartClassification.data.datasets[0].data = [
+      defectCounts.greenObject,
+      defectCounts.defected,
+      defectCounts.foreignObject,
+    ];
+    pieChartClassification.update();
+  }
+
+  // Cập nhật biểu đồ chi tiết bệnh
+  if (pieChartDefects) {
+    pieChartDefects.data.datasets[0].data = [
+      defectCounts.worm,
+      defectCounts.crack,
+      defectCounts.black,
+    ];
+    pieChartDefects.update();
+  }
+}

@@ -42,23 +42,33 @@
                     <div class="col-md-6">
                         <div class="module" id="trackingModule">
                             <h3>Báo Cáo Phân Loại (<span id="currentDate"></span>)</h3>
-                            <ul class="list-unstyled">
-                                <li>Hạt Xanh: <span id="greenCount">0</span></li>
-                                <li>Hạt Hư: <span id="defectedCount">0</span></li>
-                                <li>Dị Vật: <span id="foreignCount">0</span></li>
-                            </ul>
-                            <button class="btn btn-warning" type="button" onclick="exportReport('daily')">
-                                Xuất Báo Cáo
-                            </button>
+                            <div class="row align-items-center">
+                                <!-- Thống kê số liệu -->
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        <li>Hạt Xanh: <span id="greenCount">0</span></li>
+                                        <li>Hạt Hư: <span id="defectedCount">0</span></li>
+                                        <li>Dị Vật: <span id="foreignCount">0</span></li>
+                                    </ul>
+                                    <button class="btn btn-warning btn-sm mt-2" type="button"
+                                        onclick="exportReport('daily')">
+                                        Xuất Báo Cáo
+                                    </button>
+                                </div>
+                                <!-- Biểu đồ -->
+                                <div class="col-6">
+                                    <canvas id="pieChartClassification" width="200" height="200"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
-                <!-- Defect Module -->
+            <!-- Defect Module -->
+            <div class="col-md-4">
                 <div class="module" id="defectModule">
                     <h3>Báo Cáo Bệnh Chi Tiết</h3>
-                    <div class="search-bar">
+                    <div class="search-bar d-flex gap-2 mb-2">
                         <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm..."
                             oninput="filterCategories()">
                         <select id="sortOption" class="form-select" onchange="sortCategories()">
@@ -66,15 +76,24 @@
                             <option value="count">Theo Số Lượng</option>
                         </select>
                     </div>
-                    <ul id="categoryList" class="category-list">
-                        <li>Hư (<span id="defected-count">0</span>)
-                            <ul class="sub-category">
-                                <li>Sâu (<span id="worm-count">0</span>)</li>
-                                <li>Bể (<span id="crack-count">0</span>)</li>
-                                <li>Đen (<span id="black-count">0</span>)</li>
+                    <div class="row align-items-center">
+                        <!-- Thống kê chi tiết -->
+                        <div class="col-6">
+                            <ul id="categoryList" class="category-list">
+                                <li>Hư (<span id="defected-count">0</span>)
+                                    <ul class="sub-category">
+                                        <li>Sâu (<span id="worm-count">0</span>)</li>
+                                        <li>Bể (<span id="crack-count">0</span>)</li>
+                                        <li>Đen (<span id="black-count">0</span>)</li>
+                                    </ul>
+                                </li>
                             </ul>
-                        </li>
-                    </ul>
+                        </div>
+                        <!-- Biểu đồ -->
+                        <div class="col-6">
+                            <canvas id="pieChartDefects" width="200" height="200"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
