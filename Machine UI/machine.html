@@ -1,155 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Bean Sorting UI</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="machine.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coffee Sorting - Live & Report</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./machine.css" />
 </head>
 
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-12 col-md-8">
-                <div class="row">
-                    <!-- Status Module -->
-                    <div class="col-md-6">
-                        <div class="module" id="statusModule">
-                            <div class="status-box">
-                                <div class="status-indicator">
-                                    <div class="indicator" id="statusIndicator" style="background: green;"></div>
-                                    <span id="statusText">Đang hoạt động</span>
-                                </div>
-                                <video id="liveFeed" width="100%" height="200" style="background: #ddd;"
-                                    autoplay></video>
-                                <div class="mt-3 d-flex align-items-center">
-                                    <div class="progress w-75">
-                                        <div class="progress-bar bg-info" role="progressbar" id="progressBar"
-                                            style="width: 100%;"></div>
-                                    </div>
-                                    <span class="ms-2" id="progressText">100%</span>
-                                </div>
-                                <div class="mt-3 d-flex justify-content-center gap-2">
-                                    <button class="btn btn-success" onclick="startMachine()">Bắt Đầu</button>
-                                    <button class="btn btn-danger" onclick="stopMachine()">Dừng</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Tracking Module -->
-                    <div class="col-md-6">
-                        <div class="module" id="trackingModule">
-                            <h3>Báo Cáo Phân Loại (<span id="currentDate"></span>)</h3>
-                            <div class="row align-items-center">
-                                <!-- Thống kê số liệu -->
-                                <div class="col-6">
-                                    <ul class="list-unstyled">
-                                        <li>Hạt Xanh: <span id="greenCount">0</span></li>
-                                        <li>Hạt Hư: <span id="defectedCount">0</span></li>
-                                        <li>Dị Vật: <span id="foreignCount">0</span></li>
-                                    </ul>
-                                    <button class="btn btn-warning btn-sm mt-2" type="button"
-                                        onclick="exportReport('daily')">
-                                        Xuất Báo Cáo
-                                    </button>
-                                </div>
-                                <!-- Biểu đồ -->
-                                <div class="col-6">
-                                    <canvas id="pieChartClassification" width="200" height="200"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Defect Module -->
-            <div class="col-md-4">
-                <div class="module" id="defectModule">
-                    <h3>Báo Cáo Bệnh Chi Tiết</h3>
-                    <div class="search-bar d-flex gap-2 mb-2">
-                        <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm..."
-                            oninput="filterCategories()">
-                        <select id="sortOption" class="form-select" onchange="sortCategories()">
-                            <option value="default">Mặc Định</option>
-                            <option value="count">Theo Số Lượng</option>
-                        </select>
-                    </div>
-                    <div class="row align-items-center">
-                        <!-- Thống kê chi tiết -->
-                        <div class="col-6">
-                            <ul id="categoryList" class="category-list">
-                                <li>Hư (<span id="defected-count">0</span>)
-                                    <ul class="sub-category">
-                                        <li>Sâu (<span id="worm-count">0</span>)</li>
-                                        <li>Bể (<span id="crack-count">0</span>)</li>
-                                        <li>Đen (<span id="black-count">0</span>)</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                        <!-- Biểu đồ -->
-                        <div class="col-6">
-                            <canvas id="pieChartDefects" width="200" height="200"></canvas>
-                        </div>
-                    </div>
-                </div>
+    <div class="main-wrapper">
+        <!-- CAMERA MODULE -->
+        <div id="cameraModule" class="module">
+            <h4 id="machineStatus">
+                <span class="status-dot" style="background-color: #ff0000;"></span> Đang dừng
+            </h4>
+            <video id="liveFeed" autoplay muted></video>
+            <div class="btn-group mt-3">
+                <button class="btn btn-success" onclick="startMachine()">Bắt Đầu</button>
+                <button class="btn btn-danger" onclick="stopMachine()">Dừng</button>
             </div>
         </div>
-        <!-- Chart Module -->
-        <div class="row">
-            <div class="col-12 col-md-6">
-                <div class="module" id="chartModule">
-                    <h3>Biểu Đồ Theo Dõi Phân Loại Trực Tiếp (Máy 1)</h3>
-                    <div class="mb-3">
-                        <label class="form-label">Loại Biểu Đồ</label>
-                        <select id="chartType" class="form-select mb-2">
-                            <option value="overview">Tổng Quát</option>
-                            <option value="detail">Chi Tiết Bệnh</option>
-                        </select>
-                        <label class="form-label">Thời Gian</label>
-                        <select id="timeScale">
-                            <option value="hour">Theo Giờ</option>
-                            <option value="day">Theo Ngày</option>
-                        </select>
-                    </div>
-                    <canvas id="sortingChart"></canvas>
+    </div>
+
+    <!-- MODAL CHUẨN BỊ TRƯỚC KHI BẮT ĐẦU -->
+    <div id="prepModal" class="app-modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chuẩn bị trước khi bắt đầu</h5>
                 </div>
-            </div>
-            <div class="col-12 col-md-6">
-                <div class="module" id="chartModule">
-                    <h3>Biểu Đồ Theo Dõi Phân Loại Theo File</h3>
-                    <input type="file" id="importedExcel2" accept=".xlsx" class="form-control mt-2">
-                    <div class="mb-3">
-                        <label class="form-label">Loại Biểu Đồ</label>
-                        <select id="chartType2" class="form-select mb-2">
-                            <option value="overview">Tổng Quát</option>
-                            <option value="detail">Chi Tiết Bệnh</option>
-                        </select>
-                        <select id="timeScale2">
-                            <option value="minute">Theo Phút</option>
-                            <option value="hour">Theo Giờ</option>
-                        </select>
-                    </div>
-                    <canvas id="sortingChart2"></canvas>
+                <div class="modal-body">
+                    <ul>
+                        <li>Chuẩn bị 300g hạt</li>
+                        <li>Bật băng chuyền</li>
+                        <li>Khởi động động cơ rung</li>
+                        <li>Bật đèn LED (nếu có)</li>
+                        <li>Chuẩn bị rút phễu</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="cancelPrep()">Hủy</button>
+                    <button class="btn btn-primary" onclick="confirmPrep()">Xác nhận</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
+    <!-- MODAL BÁO CÁO -->
+    <div id="reportModal" class="app-modal">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Báo Cáo Phân Loại</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row report-layout">
+                        <!-- CỘT 1: Thống kê số lượng -->
+                        <div class="col stats-col">
+                            <div class="count-row"><span class="label green">Hạt Xanh:</span> <span
+                                    id="greenCount">0</span></div>
+                            <div class="count-row"><span class="label gray">Hạt Đen:</span> <span
+                                    id="blackCount">0</span></div>
+                            <div class="count-row"><span class="label yellow">Hạt Chua:</span> <span
+                                    id="sourCount">0</span></div>
+                            <div class="count-row"><span class="label purple">Hạt Bể:</span> <span
+                                    id="brokenCount">0</span></div>
+                            <div class="count-row"><span class="label orange">Hạt Sém:</span> <span
+                                    id="scorchedCount">0</span></div>
+                            <div class="count-row mt-2 fw-bold">Tổng số hạt: <span id="totalCount">0</span></div>
+                        </div>
+
+                        <!-- CỘT 2: Biểu đồ -->
+                        <div class="col chart-col text-center">
+                            <canvas id="pieChartClassification" width="220" height="220"></canvas>
+                        </div>
+
+                        <!-- CỘT 3: Đánh giá & lời khuyên -->
+                        <div class="col advice-col">
+                            <div id="qualityEvaluation" class="quality-box">
+                                <h6>Đánh giá chất lượng</h6>
+                                <p id="defectScoreText">Điểm lỗi: --</p>
+                                <p id="qualityGradeText">Phân loại: --</p>
+                                <hr />
+                                <p id="qualityDescription">Mô tả: --</p>
+                                <p id="qualityImprovement">Gợi ý cải thiện: --</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="resetAll()">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="machine.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="./machine.js"></script>
 </body>
 
 </html>
